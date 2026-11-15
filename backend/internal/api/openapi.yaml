@@ -1,0 +1,368 @@
+openapi: 3.0.3
+info:
+  title: PRD Assistant API
+  version: 1.0.0
+  description: |
+    REST API for the PRD Assistant, an LLM-powered agent that walks a product manager
+    through a PRD one question at a time, checks answers against PRD quality rules,
+    and exports the result as Word or PDF.
+
+    **Flow:** configure an LLM (`/llm/configure`) -> create a session (`/sessions`)
+    -> answer questions (`/sessions/{id}/answer`) -> edit blocks (propose/apply)
+    -> generate polished PRD -> export.
+servers:
+  - url: /api
+tags:
+  - name: LLM
+  - name: Sessions
+  - name: Editing
+  - name: Export
+  - name: Meta
+paths:
+  /health:
+    get:
+      tags: [Meta]
+      summary: Liveness check
+      responses:
+        "200": { description: OK }
+  /tags:
+    get:
+      tags: [Meta]
+      summary: Available tags (priority P0-P2, release V1-V3, status)
+      responses:
+        "200":
+          description: Tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Tag" }
+  /prd-types:
+    get:
+      tags: [Meta]
+      summary: PRD types (product, project, feature) with their section order
+      responses:
+        "200": { description: PRD types }
+  /tools:
+    get:
+      tags: [Meta]
+      summary: Tools registered with the agent
+      responses:
+        "200": { description: Tool list }
+  /llm/status:
+    get:
+      tags: [LLM]
+      summary: Is an LLM configured? (never returns the API key)
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LLMStatus" }
+  /llm/local:
+    get:
+      tags: [LLM]
+      summary: Check a locally running LLM (Ollama / LM Studio) and list its models
+      parameters:
+        - { name: base_url, in: query, schema: { type: string }, example: "http://localhost:11434" }
+      responses:
+        "200": { description: Reachability and model list }
+  /llm/configure:
+    post:
+      tags: [LLM]
+      summary: Set an API key or connect a local LLM (verified with a test call)
+      description: Held in server memory only. Restarting the server requires doing this again.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LLMConfig" }
+      responses:
+        "200":
+          description: Configured
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LLMStatus" }
+        "400": { $ref: "#/components/responses/Error" }
+  /llm/reset:
+    post:
+      tags: [LLM]
+      summary: Forget the configured LLM
+      responses:
+        "200": { description: Reset }
+  /sessions:
+    get:
+      tags: [Sessions]
+      summary: List recent PRD sessions
+      responses:
+        "200": { description: Sessions }
+    post:
+      tags: [Sessions]
+      summary: Start a PRD session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prd_type]
+              properties:
+                prd_type: { type: string, enum: [product, project, feature] }
+      responses:
+        "201":
+          description: Session with the first question
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/State" }
+        "400": { $ref: "#/components/responses/Error" }
+  /sessions/{id}:
+    parameters: [{ $ref: "#/components/parameters/SessionID" }]
+    get:
+      tags: [Sessions]
+      summary: Session state (chat history + the next question)
+      responses:
+        "200":
+          description: State
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/State" }
+        "404": { $ref: "#/components/responses/Error" }
+  /sessions/{id}/answer:
+    parameters: [{ $ref: "#/components/parameters/SessionID" }]
+    post:
+      tags: [Sessions]
+      summary: Answer the current question
+      description: |
+        The answer is reviewed by the LLM against the question's quality rules. If it
+        is weak (e.g. a goal isn't measurable, or a requirement has no P0-P2 tag) it is
+        saved with `status: needs_review`, feedback is added to the chat and the same
+        question is asked again. The answer may also fill in later questions of the
+        same section.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+                tags:
+                  type: array
+                  items: { type: string }
+                  example: [P0, V1]
+      responses:
+        "200":
+          description: Updated state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/State" }
+        "400": { $ref: "#/components/responses/Error" }
+  /sessions/{id}/skip:
+    parameters: [{ $ref: "#/components/parameters/SessionID" }]
+    post:
+      tags: [Sessions]
+      summary: Skip an optional question (or the rest of the section)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scope: { type: string, enum: [question, section] }
+      responses:
+        "200": { description: Updated state }
+        "400": { $ref: "#/components/responses/Error" }
+  /sessions/{id}/repeat:
+    parameters: [{ $ref: "#/components/parameters/SessionID" }]
+    post:
+      tags: [Sessions]
+      summary: Answer "add another persona/requirement?"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [add]
+              properties:
+                add: { type: boolean }
+      responses:
+        "200": { description: Updated state }
+        "400": { $ref: "#/components/responses/Error" }
+  /sessions/{id}/answers/{aid}/accept:
+    parameters:
+      - { $ref: "#/components/parameters/SessionID" }
+      - { $ref: "#/components/parameters/AnswerID" }
+    post:
+      tags: [Sessions]
+      summary: Keep an answer flagged by the validator as is
+      responses:
+        "200": { description: Updated state }
+  /sessions/{id}/answers/{aid}/propose:
+    parameters:
+      - { $ref: "#/components/parameters/SessionID" }
+      - { $ref: "#/components/parameters/AnswerID" }
+    post:
+      tags: [Editing]
+      summary: Preview an edit (before / after diff) without applying it
+      description: Provide `content` (manual edit) or `instruction` (ask the AI to rewrite), and optionally `tags`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content: { type: string }
+                tags: { type: array, items: { type: string } }
+                instruction: { type: string, example: "Make the goal measurable" }
+      responses:
+        "200":
+          description: Proposal with word-level diff
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Proposal" }
+  /sessions/{id}/answers/{aid}/apply:
+    parameters:
+      - { $ref: "#/components/parameters/SessionID" }
+      - { $ref: "#/components/parameters/AnswerID" }
+    post:
+      tags: [Editing]
+      summary: Apply a confirmed edit (the previous value is kept in history)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+                tags: { type: array, items: { type: string } }
+      responses:
+        "200": { description: Updated answer }
+        "400": { $ref: "#/components/responses/Error" }
+  /sessions/{id}/answers/{aid}/history:
+    parameters:
+      - { $ref: "#/components/parameters/SessionID" }
+      - { $ref: "#/components/parameters/AnswerID" }
+    get:
+      tags: [Editing]
+      summary: The last 3 previous versions of a block (newest first)
+      responses:
+        "200": { description: Versions }
+  /sessions/{id}/preview:
+    parameters:
+      - { $ref: "#/components/parameters/SessionID" }
+      - { $ref: "#/components/parameters/TagFilter" }
+    get:
+      tags: [Sessions]
+      summary: Live PRD preview (structured blocks + markdown)
+      responses:
+        "200": { description: Preview }
+  /sessions/{id}/generate:
+    parameters:
+      - { $ref: "#/components/parameters/SessionID" }
+      - { $ref: "#/components/parameters/TagFilter" }
+    post:
+      tags: [Export]
+      summary: Ask the LLM to write the polished, structured PRD
+      responses:
+        "200":
+          description: Markdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  markdown: { type: string }
+        "400": { $ref: "#/components/responses/Error" }
+  /sessions/{id}/export:
+    parameters:
+      - { $ref: "#/components/parameters/SessionID" }
+      - { $ref: "#/components/parameters/TagFilter" }
+    get:
+      tags: [Export]
+      summary: Download the PRD as Word (.docx) or PDF
+      parameters:
+        - { name: format, in: query, schema: { type: string, enum: [docx, pdf], default: docx } }
+        - { name: source, in: query, schema: { type: string, enum: [answers, polished], default: answers } }
+      responses:
+        "200":
+          description: File
+          content:
+            application/pdf: { schema: { type: string, format: binary } }
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema: { type: string, format: binary }
+components:
+  parameters:
+    SessionID: { name: id, in: path, required: true, schema: { type: string } }
+    AnswerID: { name: aid, in: path, required: true, schema: { type: string } }
+    TagFilter:
+      name: tags
+      in: query
+      description: Comma-separated tags. When set, tagged blocks are included only if they carry one of them; untagged blocks are always included.
+      schema: { type: string, example: "P0,V1" }
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              hint: { type: string }
+  schemas:
+    Tag:
+      type: object
+      properties:
+        key: { type: string, example: P0 }
+        group: { type: string, enum: [priority, release, status] }
+        description: { type: string }
+    LLMConfig:
+      type: object
+      required: [mode]
+      properties:
+        mode: { type: string, enum: [api, local] }
+        provider: { type: string, enum: [openai, anthropic, gemini], description: "api mode" }
+        api_key: { type: string, description: "api mode; held in memory only" }
+        model: { type: string, description: "optional; a sensible default is used" }
+        base_url: { type: string, example: "http://localhost:11434", description: "local mode" }
+    LLMStatus:
+      type: object
+      properties:
+        ready: { type: boolean }
+        default_local_url: { type: string }
+        info:
+          type: object
+          properties:
+            mode: { type: string }
+            provider: { type: string }
+            model: { type: string }
+    State:
+      type: object
+      properties:
+        session: { type: object }
+        messages: { type: array, items: { type: object } }
+        prompt:
+          type: object
+          description: The next thing to ask. `kind` is question, repeat or done.
+    Proposal:
+      type: object
+      properties:
+        answer_id: { type: string }
+        label: { type: string }
+        old: { type: string }
+        new: { type: string }
+        old_tags: { type: array, items: { type: string } }
+        new_tags: { type: array, items: { type: string } }
+        changed: { type: boolean }
+        diff:
+          type: array
+          items:
+            type: object
+            properties:
+              op: { type: string, enum: [equal, add, del] }
+              text: { type: string }

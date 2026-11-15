@@ -1,0 +1,132 @@
+type: project
+title: Project PRD
+description: A PRD for a time-boxed project. Emphasises objectives, stakeholders, deliverables, timeline and resources.
+sections:
+  - key: background
+    title: Background & Problem
+    intro: "Let's start with why this project exists."
+    questions:
+      - key: project_name
+        label: Project name
+        prompt: "What is the project called, and what is it in one sentence?"
+        required: true
+      - key: problem_statement
+        label: Problem statement
+        prompt: "What problem or opportunity is behind this project? Who is affected and what is the impact?"
+        hint: "Example: Support teams spend 12 hrs/week manually tagging tickets, delaying response times."
+        required: true
+        rules:
+          - "States WHO is affected."
+          - "Describes the problem, not the solution."
+          - "Includes impact or evidence."
+      - key: solution_summary
+        label: Proposed solution
+        prompt: "What solution will the project deliver?"
+        required: true
+        rules:
+          - "Directly addresses the stated problem."
+  - key: objectives
+    title: Objectives & KPIs
+    questions:
+      - key: objectives
+        label: Objectives
+        prompt: "What are the project objectives? Make each one measurable."
+        hint: "Example: Cut ticket triage time by 50% by end of Q2."
+        required: true
+        rules:
+          - "Each objective is measurable: metric, target and deadline."
+      - key: kpis
+        label: KPIs
+        prompt: "Which KPIs will you track, and how?"
+        required: true
+        rules:
+          - "Names concrete KPIs with a way to measure them."
+  - key: stakeholders
+    title: Stakeholders
+    intro: "Who is involved? One stakeholder at a time."
+    repeatable: stakeholder
+    questions:
+      - key: stakeholder_name
+        label: Name
+        prompt: "Name of the stakeholder (person or team)?"
+        required: true
+      - key: designation
+        label: Designation / role
+        prompt: "What is their designation or role?"
+        required: true
+      - key: interest
+        label: Interest / responsibility
+        prompt: "What is their interest or responsibility in this project?"
+        required: true
+  - key: scope
+    title: Scope & Deliverables
+    questions:
+      - key: deliverables
+        label: Deliverables
+        prompt: "What will the project deliver?"
+        required: true
+      - key: in_scope
+        label: In scope
+        prompt: "What is IN scope?"
+        required: true
+      - key: out_of_scope
+        label: Out of scope
+        prompt: "What is explicitly OUT of scope?"
+        required: true
+  - key: requirements
+    title: Requirements
+    repeatable: requirement
+    questions:
+      - key: requirement
+        label: Requirement
+        prompt: "Describe the requirement. Pick a priority tag (P0-P2)."
+        required: true
+        priority: true
+        rules:
+          - "Describes one specific, testable capability."
+      - key: acceptance_criteria
+        label: Acceptance criteria
+        prompt: "How will we know it's done? List the acceptance criteria."
+        required: true
+        rules:
+          - "Criteria are testable and unambiguous (pass/fail)."
+  - key: timeline
+    title: Timeline & Milestones
+    questions:
+      - key: milestones
+        label: Milestones
+        prompt: "What are the key milestones and dates?"
+        required: true
+      - key: deadline
+        label: Hard deadline
+        prompt: "Is there a hard deadline or external constraint?"
+  - key: resources
+    title: Resources
+    questions:
+      - key: team
+        label: Team
+        prompt: "Who is on the project team and in what roles?"
+      - key: budget
+        label: Budget & tools
+        prompt: "Budget, tools or infrastructure needed?"
+  - key: risks
+    title: Risks & Mitigations
+    questions:
+      - key: risks
+        label: Risks
+        prompt: "What are the main project risks?"
+      - key: mitigations
+        label: Mitigations
+        prompt: "How would you mitigate them?"
+  - key: success
+    title: Success Criteria
+    questions:
+      - key: success_criteria
+        label: Success criteria
+        prompt: "When is this project considered a success?"
+        required: true
+        rules:
+          - "Measurable and tied to the objectives."
+      - key: open_questions
+        label: Open questions
+        prompt: "Anything unresolved that needs a decision?"

@@ -1,0 +1,160 @@
+type: product
+title: Product PRD
+description: A full PRD for a whole product, following the Product PRD template from the referenced article (problem, vision, use cases, solution, goals, success metrics, requirements).
+sections:
+  - key: details
+    title: Document Details
+    intro: "Let's start with the basics. Only the title is required."
+    questions:
+      - key: product_name
+        label: Product PRD title
+        prompt: "What is the product called, and what is it in one sentence?"
+        required: true
+      - key: author
+        label: Author
+        prompt: "Who is the author (PM)?"
+      - key: status
+        label: Status
+        prompt: "What is the document status (Draft, In review, Approved)?"
+      - key: reviewers
+        label: Reviewers
+        prompt: "Who are the reviewers (UX, Eng, others)?"
+  - key: problem
+    title: Problem
+    intro: "The heart of the PRD. Focus on the PROBLEM, not on the lack of a solution."
+    questions:
+      - key: problem_statement
+        label: Problem statement
+        prompt: "In one or two lines: what problem are you solving, and for whom?"
+        hint: "Example: Small clinics lose ~20% of appointments to no-shows (internal data, Q3)."
+        required: true
+        rules:
+          - "States WHO has the problem."
+          - "Describes the problem itself, not the lack of a solution."
+          - "Understandable without lots of background."
+      - key: background
+        label: Background & evidence
+        prompt: "Any background data points, sub-problems or rationale (survey data, research links)?"
+  - key: vision
+    title: Vision & Opportunity
+    questions:
+      - key: vision
+        label: Vision & opportunity
+        prompt: "In one line: what is the product opportunity?"
+        hint: "Example: Enable 1B travelers to enjoy a private jet for a reasonable price."
+      - key: market
+        label: Market sizing & strategy links
+        prompt: "Any market opportunity sizing, or links to strategy doc / competitive analysis?"
+  - key: use_cases
+    title: Target Use Cases
+    intro: "Who are the users and what are they trying to do? Focus on the MOST COMMON user types, in priority order. One at a time."
+    repeatable: use case
+    questions:
+      - key: user_type
+        label: User type
+        prompt: "Who is this user (persona or type, and their role/designation)?"
+        required: true
+      - key: use_case
+        label: Use case
+        prompt: "As this user, what do they want to do and why? (\"As a <user>, I want to <goal> so that <benefit>\")"
+        required: true
+        rules:
+          - "Describes what the user wants to do, abstracted away from the solution."
+      - key: pain_points
+        label: Pain points
+        prompt: "What are their pain points around this?"
+  - key: landscape
+    title: Landscape (optional)
+    questions:
+      - key: landscape
+        label: Landscape
+        prompt: "What context leads to your solution: what other products do, trends, regulation, risks?"
+  - key: solution
+    title: Proposed Solution
+    questions:
+      - key: solution_summary
+        label: Proposed solution
+        prompt: "In one or two lines: what is the proposed product offering? Be as concrete as possible."
+        hint: "Example: An 'Uber for private flights', starting with a mobile app for business travelers."
+        required: true
+        rules:
+          - "Directly addresses the stated problem."
+          - "Concrete, not vague."
+      - key: value_props
+        label: Top 3 MVP value props
+        prompt: "What are your top 3 MVP value props? Label each as a vitamin (must-have), painkiller (solves a big pain) or steroid (the magic moment)."
+  - key: goals
+    title: Goals
+    questions:
+      - key: goals
+        label: Goals
+        prompt: "What are the key goals and user/business benefits?"
+        required: true
+        rules:
+          - "States clear benefits or outcomes (e.g. save time, reduce confusion)."
+  - key: non_goals
+    title: Non-Goals
+    questions:
+      - key: non_goals
+        label: Non-goals
+        prompt: "What is explicitly out of scope? (This heads off questions later.)"
+        required: true
+  - key: metrics
+    title: Y1 Success Metrics
+    intro: "How will you know it worked? One goal at a time: goal, signals, metric and target."
+    repeatable: success metric
+    questions:
+      - key: metric_goal
+        label: Goal
+        prompt: "Which goal is this metric for (e.g. Engagement & Adoption, Business Value)?"
+        required: true
+      - key: signals
+        label: Signals
+        prompt: "What signals show it's working (e.g. users returning, user base size)?"
+      - key: metric
+        label: Metric
+        prompt: "Which metric measures it (e.g. weekly active users, 1-week retention) and how is it measured?"
+        required: true
+        rules:
+          - "Names a concrete metric and how it is measured."
+      - key: target
+        label: Target
+        prompt: "What is the target value, and by when?"
+        required: true
+        rules:
+          - "Measurable: a number, plus a timeframe or baseline."
+  - key: conceptual
+    title: Conceptual Model (optional)
+    questions:
+      - key: conceptual_model
+        label: Conceptual model
+        prompt: "What are the key things a user needs to learn (the main objects and how they relate)?"
+  - key: requirements
+    title: Requirements
+    intro: "Describe the solution as functionality ('User can do X'), not design or tech implementation. Priority: P0 = MVP for GA, P1 = important for a delightful experience, P2 = nice-to-have. One requirement at a time."
+    repeatable: requirement
+    questions:
+      - key: journey
+        label: Use case / journey
+        prompt: "Which use case or critical user journey does this requirement belong to?"
+      - key: requirement
+        label: Requirement
+        prompt: "Describe the requirement as 'User can do X'. Pick a priority tag (P0-P2)."
+        hint: "Example: Students can easily share their resume with their college counselors."
+        required: true
+        priority: true
+        rules:
+          - "Describes functionality (what the user can do), not UI design or technical implementation."
+          - "One specific, testable capability."
+      - key: acceptance_criteria
+        label: Notes / acceptance criteria
+        prompt: "Any acceptance criteria or notes (links to mini-PRDs, mockups)?"
+  - key: appendix
+    title: Appendix (optional)
+    questions:
+      - key: considerations
+        label: Product & design considerations
+        prompt: "Any product/design considerations, decisions, alternatives or assumptions worth recording?"
+      - key: gtm
+        label: Go-to-market
+        prompt: "Any go-to-market notes (positioning, pricing and packaging)?"

@@ -1,0 +1,131 @@
+type: feature
+title: Feature PRD
+description: A focused PRD for one feature within a product, following the Feature PRD template from the referenced article (keep it to about 6 pages).
+sections:
+  - key: details
+    title: Document Details
+    intro: "Let's start with the basics. Only the title is required."
+    questions:
+      - key: feature_name
+        label: Feature PRD title
+        prompt: "What is the feature called, and which product is it part of?"
+        required: true
+      - key: author
+        label: Author
+        prompt: "Who is the author (PM)?"
+      - key: status
+        label: Status
+        prompt: "What is the document status (Draft, In review, Approved)?"
+      - key: reviewers
+        label: Reviewers
+        prompt: "Who are the reviewers (UX, Eng, others)?"
+  - key: problem
+    title: The Problem
+    intro: "Focus on the PROBLEM, not on the lack of a solution."
+    questions:
+      - key: problem_statement
+        label: Problem statement
+        prompt: "In one or two lines: what problem are you solving, and for whom?"
+        hint: "Example: 35% of users abandon checkout at the address step (analytics, last 30 days)."
+        required: true
+        rules:
+          - "States WHO has the problem."
+          - "Describes the problem itself, not the lack of a solution."
+          - "Understandable without lots of background."
+      - key: background
+        label: Background & evidence
+        prompt: "Any background data points, sub-problems or rationale (survey data, research links)?"
+  - key: use_cases
+    title: Target Use Cases
+    intro: "Who are the users and what are they trying to do? Focus on the MOST COMMON ones, in priority order. One at a time."
+    repeatable: use case
+    questions:
+      - key: user_type
+        label: User type
+        prompt: "Who is this user (persona or type, and their role/designation)?"
+        required: true
+      - key: use_case
+        label: Use case
+        prompt: "As this user, what do they want to do and why? (\"As a <user>, I want to <goal> so that <benefit>\")"
+        required: true
+        rules:
+          - "Describes what the user wants to do, abstracted away from the solution."
+      - key: pain_points
+        label: Pain points
+        prompt: "What are their pain points around this?"
+  - key: journeys
+    title: Current User Journeys
+    questions:
+      - key: current_journey
+        label: Current user journey
+        prompt: "Walk through the current journey and where users hit the problem."
+        hint: "Example: [user is in Docs] > [clicks Share] > [unsure: link vs people] > [copies link from dialog]"
+  - key: landscape
+    title: Landscape (optional)
+    questions:
+      - key: landscape
+        label: Landscape
+        prompt: "What context leads to your solution: what other products do, trends, regulation, risks?"
+  - key: solution
+    title: Proposed Solution
+    questions:
+      - key: solution_summary
+        label: Proposed solution
+        prompt: "In one or two lines: what is the proposed solution? Be as concrete as possible."
+        hint: "Example: Combine the options in the sharing dialog into one dropdown and add info icons to clarify access levels."
+        required: true
+        rules:
+          - "Directly addresses the stated problem."
+          - "Concrete, not vague."
+  - key: goals
+    title: Goals
+    questions:
+      - key: goals
+        label: Goals
+        prompt: "What are the key goals and user/business benefits (reduce confusion, save time, consistency)?"
+        required: true
+        rules:
+          - "States clear benefits or outcomes."
+  - key: out_of_scope
+    title: Out-of-scope
+    questions:
+      - key: out_of_scope
+        label: Out-of-scope
+        prompt: "What is clearly out of scope? (This pre-empts questions.)"
+        required: true
+  - key: outcomes
+    title: Measurable Outcomes
+    questions:
+      - key: measurable_outcomes
+        label: Measurable outcomes
+        prompt: "What will you measure to show the solution works (adoption, satisfaction, revenue), with baseline and target?"
+        hint: "Example: Increase user satisfaction, measured by an in-product survey (1-5), from a baseline of 3.2 to 4.0 within 8 weeks."
+        required: true
+        rules:
+          - "Measurable: names a metric, how it is measured, a baseline and a target or timeframe."
+  - key: requirements
+    title: Requirements
+    intro: "Describe the solution as functionality ('User can do X'), not design or tech implementation. Priority: P0 = MVP for GA, P1 = important for a delightful experience, P2 = nice-to-have. One requirement at a time."
+    repeatable: requirement
+    questions:
+      - key: journey
+        label: Use case / journey
+        prompt: "Which use case or user journey does this requirement belong to?"
+      - key: requirement
+        label: Requirement
+        prompt: "Describe the requirement as 'User can do X'. Pick a priority tag (P0-P2)."
+        hint: "Example: Students can learn more about how sharing with counselors works."
+        required: true
+        priority: true
+        rules:
+          - "Describes functionality (what the user can do), not UI design or technical implementation."
+          - "One specific, testable capability."
+      - key: acceptance_criteria
+        label: Notes / acceptance criteria
+        prompt: "Any acceptance criteria or notes (links to help articles, mockups)?"
+  - key: appendix
+    title: Appendix (optional)
+    questions:
+      - key: appendix
+        label: Appendix
+        prompt: "Any questions, decisions, alternatives considered or assumptions worth recording?"
